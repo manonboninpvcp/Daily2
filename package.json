@@ -1,0 +1,10 @@
+{
+  "name": "tableau-screenshot",
+  "private": true,
+  "scripts": {
+    "screenshot": "node screenshot.js"
+  },
+  "dependencies": {
+    "playwright": "^1.55.0"
+  }
+}
