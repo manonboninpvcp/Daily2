@@ -10,32 +10,34 @@ const URL = 'https://dub01.online.tableau.com/#/site/kpiroom/views/DailypickupYv
 
   await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 120000 });
 
-  await page.locator('input[type="email"], input[name="username"], input[id*="username"], input').first()
-    .fill(process.env.TABLEAU_USERNAME);
+  await page.screenshot({ path: 'debug-01-start.png', fullPage: true });
 
-  await page.locator('button:has-text("Sign In"), button:has-text("Continue"), button:has-text("Connexion"), button:has-text("Se connecter")')
-    .first()
-    .click();
+  await page.locator('input').first().fill(process.env.TABLEAU_USERNAME);
+  await page.screenshot({ path: 'debug-02-username-filled.png', fullPage: true });
 
-  await page.waitForTimeout(5000);
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(8000);
 
-  await page.locator('input[type="password"], input[name="password"], input[id*="password"]')
-    .first()
-    .fill(process.env.TABLEAU_PASSWORD);
+  await page.screenshot({ path: 'debug-03-after-enter.png', fullPage: true });
 
-  await page.locator('button:has-text("Sign In"), button:has-text("Connexion"), button:has-text("Se connecter"), button[type="submit"]')
-    .first()
-    .click();
+  const passwordInput = page.locator('input[type="password"]');
 
-  await page.waitForLoadState('networkidle', { timeout: 120000 }).catch(() => {});
-  await page.waitForTimeout(25000);
+  if (await passwordInput.count() > 0) {
+    await passwordInput.first().fill(process.env.TABLEAU_PASSWORD);
+    await page.keyboard.press('Enter');
 
-  const date = new Date().toISOString().slice(0, 10);
+    await page.waitForLoadState('networkidle', { timeout: 120000 }).catch(() => {});
+    await page.waitForTimeout(25000);
 
-  await page.screenshot({
-    path: `daily-pickup-${date}.png`,
-    fullPage: true
-  });
+    const date = new Date().toISOString().slice(0, 10);
+    await page.screenshot({
+      path: `daily-pickup-${date}.png`,
+      fullPage: true
+    });
+  } else {
+    await page.screenshot({ path: 'debug-no-password-field.png', fullPage: true });
+    throw new Error('Aucun champ mot de passe trouvé après saisie du username.');
+  }
 
   await browser.close();
 })();
